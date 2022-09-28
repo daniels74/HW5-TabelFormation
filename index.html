@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Table Formation</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <table id="salesTable">
+      <tr>
+        <th>region</th>
+        <th>model</th>
+        <th>sales</th>
+      </tr>
+    </table>
+  </body>
+
+  <script>
+    const data = [
+      { region: "US", model: "A", sales: 150 },
+      { region: "US", model: "B", sales: 120 },
+      { region: "US", model: "C", sales: 350 },
+      { region: "EU", model: "A", sales: 200 },
+      { region: "EU", model: "B", sales: 100 },
+      { region: "EU", model: "C", sales: 250 },
+      { region: "CA", model: "A", sales: 200 },
+      { region: "CA", model: "B", sales: 100 },
+      { region: "CA", model: "C", sales: 230 },
+      { region: "CA", model: "D", sales: 400 },
+    ];
+
+    (function organizeTable() {
+      const organizedTable = [];
+      //Get sums and put into map
+      const sumMap = new Map();
+      data.forEach((row, index) => {
+        if (sumMap.has(row.region) === false) { // Start a new sum?
+          sumMap.set(row.region, row.sales);
+        } else if (sumMap.has(row.region) === true) { // Add to an existing sum
+          let curSum = sumMap.get(row.region);
+          curSum = curSum + row.sales;
+          sumMap.set(row.region, curSum);
+        }
+      });
+
+      // update data with sums
+      data.forEach((object, index) => {
+        if (sumMap.has(object.region)) {  // Is the region the first of its kind?
+          let theSum = sumMap.get(object.region);
+          organizedTable.push({   // push total sales
+            region: object.region,
+            model: "Sum",
+            sales: theSum,
+          });
+          sumMap.delete(object.region); // delete current region's sum
+          organizedTable.push({ // push current object
+            region: object.region,
+            model: object.model,
+            sales: object.sales,
+          });
+        } else {
+          organizedTable.push({ // push current object
+            region: object.region,
+            model: object.model,
+            sales: object.sales,
+          });
+        }
+      });
+      updateTable(organizedTable);
+    })();
+    function updateTable(organizedTable) {
+      // (1) Open the table string
+      var myTable = "<table><tr>";
+
+      // (2) Generate rows
+      var maxCol = 3; 
+      organizedTable.forEach((value, i) => {
+        var columnIndex = 0;
+        for (const col in value) {  
+          myTable += `<td>${value[col]}</td>`;  // fill a cell
+          var next = columnIndex + 1; // 0,1,2 -> 1,2,3 
+          if (next % maxCol == 0) { // Next row
+            myTable += "</tr><tr>"; // close row tag and make new
+          }
+          if (columnIndex === 2) {
+            columnIndex = 0;  // reset cell counter
+          } else {
+            columnIndex++; // increment cell counter
+          }
+        }
+      });
+
+      // (3) Close the table string
+      myTable += "</tr></table>";
+
+      // (4) Attach html to container
+      document.getElementById("salesTable").innerHTML += myTable;
+    }
+  </script>
+</html>
